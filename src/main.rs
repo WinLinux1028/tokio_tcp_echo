@@ -7,9 +7,19 @@ use tokio::{
 
 #[tokio::main]
 async fn main() {
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:20230")
-        .await
-        .unwrap();
+    let mut args = std::env::args();
+    args.next();
+
+    let mut listen = None;
+    while let Some(s) = args.next() {
+        match s.as_str() {
+            "--listen" => listen = args.next(),
+            _ => continue,
+        }
+    }
+    let listen = listen.unwrap_or("[::]:4545".to_string());
+
+    let listener = tokio::net::TcpListener::bind(listen).await.unwrap();
     loop {
         let (stream, addr) = match listener.accept().await {
             Ok(o) => o,
